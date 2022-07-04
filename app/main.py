@@ -1,4 +1,4 @@
-from fastapi import FastAPI, status, HTTPException, Response
+from fastapi import FastAPI, status, HTTPException, Response, Depends
 from fastapi.params import Body
 from pydantic import BaseModel
 from typing import Optional # é optional, se não tiver = none
@@ -6,8 +6,14 @@ from random import randrange
 import psycopg2 # driver do psql
 from psycopg2.extras import RealDictCursor # tras um dict com nome da coluna(psycopg2 tras errado)
 import time
+from sqlalchemy.orm import Session
+from . import models
+from .database import engine, get_db
+
+models.Base.metadata.create_all(bind=engine)
 
 app = FastAPI()
+
 
 class Post(BaseModel): # o cara que define o DataType e validador de campos
     title: str
@@ -53,6 +59,11 @@ def find_post(id):
 @app.get("/") #decorator > method: get, root path domain. ou seja é o caminho da url
 def root(): # nome de cada função
     return {"message": "Hello World"} # o que acontece
+
+#-- TEST --#
+@app.get("/sqlalchemy")
+def test_posts(db: Session = Depends(get_db)):
+    return {"status": "sucess"}
 
 #-- GET --#
 @app.get("/posts")

@@ -8,3 +8,5 @@ https://www.youtube.com/watch?v=0sOvCWFmrtA
 - FASTAPI
 - CI/CD
 - SQLAlchemy
+
+at: 4h55m
