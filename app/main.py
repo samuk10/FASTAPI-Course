@@ -10,6 +10,9 @@ from sqlalchemy.orm import Session
 from . import models
 from .database import engine, get_db
 
+# o cara que identifica e cria as tabelas no db, 
+# mas, não modifica se houver uma tabela com o mesmo nome.
+# usar "Alembic" caso for necessário alterar a estrutura das tabelas
 models.Base.metadata.create_all(bind=engine)
 
 app = FastAPI()
@@ -60,17 +63,26 @@ def find_post(id):
 def root(): # nome de cada função
     return {"message": "Hello World"} # o que acontece
 
-#-- TEST --#
+'''-- TEST --'''
 @app.get("/sqlalchemy")
 def test_posts(db: Session = Depends(get_db)):
-    return {"status": "sucess"}
 
-#-- GET --#
+    # this way i get just data in frontend
+    #posts = db.query(models.Post).all()
+    #return {"data": posts}
+    # this way i get the return and the select it made in sql
+    posts = db.query(models.Post).all()
+    print(posts)
+    return {"data": "sucessfull"} # return sucessfull in the front
+
+
+'''#-- GET --#'''
 @app.get("/posts")
-def get_posts():
-    cursor.execute("""SELECT * FROM posts""")
-    posts = cursor.fetchall()
-    return {"data": posts}
+def get_posts(db: Session = Depends(get_db)):
+    # cursor.execute("""SELECT * FROM posts""")
+    # posts = cursor.fetchall()
+    posts = db.query(models.Post).all()
+    return {"data": posts} # return json in the front
 
 #-- CREATE --#
 @app.post("/posts", status_code=status.HTTP_201_CREATED) # alterado para 201 ao criar
