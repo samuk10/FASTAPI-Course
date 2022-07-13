@@ -9,4 +9,4 @@ https://www.youtube.com/watch?v=0sOvCWFmrtA
 - CI/CD
 - SQLAlchemy
 
-at: 4h55m
+at: 5h50m

@@ -1,13 +1,13 @@
 from fastapi import FastAPI, status, HTTPException, Response, Depends
 from fastapi.params import Body
 from pydantic import BaseModel
-from typing import Optional # é optional, se não tiver = none
+from typing import Optional, List # é optional, se não tiver = none
 from random import randrange
 import psycopg2 # driver do psql
 from psycopg2.extras import RealDictCursor # tras um dict com nome da coluna(psycopg2 tras errado)
 import time
 from sqlalchemy.orm import Session
-from . import models
+from . import models, schemas
 from .database import engine, get_db
 
 # o cara que identifica e cria as tabelas no db, 
@@ -18,10 +18,6 @@ models.Base.metadata.create_all(bind=engine)
 app = FastAPI()
 
 
-class Post(BaseModel): # o cara que define o DataType e validador de campos
-    title: str
-    content: str
-    published: bool = True # valor padrão = true
 
 # loop para tentar conectar ao banco, para em caso de erro o app não funfar sem
 while True:
@@ -63,30 +59,20 @@ def find_post(id):
 def root(): # nome de cada função
     return {"message": "Hello World"} # o que acontece
 
-'''-- TEST --'''
-@app.get("/sqlalchemy")
-def test_posts(db: Session = Depends(get_db)):
 
-    # this way i get just data in frontend
-    #posts = db.query(models.Post).all()
-    #return {"data": posts}
-    # this way i get the return and the select it made in sql
-    posts = db.query(models.Post).all()
-    print(posts)
-    return {"data": "sucessfull"} # return sucessfull in the front
 
 
 '''#-- GET --#'''
-@app.get("/posts")
+@app.get("/posts", response_model=List[schemas.Post])
 def get_posts(db: Session = Depends(get_db)):
     # cursor.execute("""SELECT * FROM posts""")
     # posts = cursor.fetchall()
     posts = db.query(models.Post).all()
-    return {"data": posts} # return json in the front
+    return posts # return json in the front
 
 #-- CREATE --#
-@app.post("/posts", status_code=status.HTTP_201_CREATED) # alterado para 201 ao criar
-def create_posts(post: Post, db: Session = Depends(get_db)):
+@app.post("/posts", status_code=status.HTTP_201_CREATED, response_model=schemas.Post) # alterado para 201 ao criar
+def create_posts(post: schemas.PostCreate, db: Session = Depends(get_db)):
     # cursor.execute("""INSERT INTO posts (title, content, published) VALUES (%s, %s, %s) RETURNING * """, 
     # (post.title, post.content, post.published)) # não da pra passar o valor direto no insert
     #                 # NÃO USAR (f"INSERT etc...) perigo de sql injection
@@ -104,10 +90,10 @@ def create_posts(post: Post, db: Session = Depends(get_db)):
     db.commit()
     db.refresh(new_post) # pega o que foi adicionado, coloca na variável e retorna
 
-    return {"data": new_post} # send o dicionario em json
+    return new_post # send o dicionario em json
 
 #-- GET{ID} --#
-@app.get("/posts/{id}")
+@app.get("/posts/{id}", response_model=schemas.Post)
 def get_post(id: int, db: Session = Depends(get_db)): # converter para int (para eviter inject)
     #cursor.execute("""SELECT * FROM posts WHERE id = %s """, (str(id),)) # convert str pois dá erro no SELECT
     #post = cursor.fetchone()
@@ -118,7 +104,7 @@ def get_post(id: int, db: Session = Depends(get_db)): # converter para int (para
                             detail=f"Post with id: {id} was not found")
         #response.status_code = status.HTTP_404_NOT_FOUND # forma feia
         #return {'message': f"Post with id: {id} was not found"}
-    return {"post_detail": post}
+    return post
 
 
 
@@ -146,8 +132,8 @@ def delete_post(id: int, db: Session = Depends(get_db)):
     #return {'message': 'post was succesfully deleted'}
 
 #-- UPDATE{ID} --# 
-@app.put("/posts/{id}")
-def update_post(id: int, updated_post: Post, db: Session = Depends(get_db)):
+@app.put("/posts/{id}", response_model=schemas.Post)
+def update_post(id: int, updated_post: schemas.PostCreate, db: Session = Depends(get_db)):
 
     #cursor.execute("""UPDATE posts SET title = %s, content = %s, published = %s WHERE id = %s RETURNING * """,
     #(post.title, post.content, post.published, str(id)))
@@ -172,7 +158,7 @@ def update_post(id: int, updated_post: Post, db: Session = Depends(get_db)):
     # Replace specific spot in the array
     # se existir o id , pega o dado em guardado em post converte par dict
 
-    return {'data': post_query.first()}
+    return post_query.first()
 
 '''
 # modelo sem o BaseModel
@@ -182,3 +168,15 @@ def create_posts(payLoad: dict = Body(...)): # extradct all fields from body, co
     return {"new_post": f"title {payLoad['title']} content: {payLoad['content']}"}
 # tittle str, content str  '''   
 
+'''TEST
+@app.get("/sqlalchemy")
+def test_posts(db: Session = Depends(get_db)):
+
+    # this way i get just data in frontend
+    #posts = db.query(models.Post).all()
+    #return {"data": posts}
+    # this way i get the return and the select it made in sql
+    posts = db.query(models.Post).all()
+    print(posts)
+    return {"data": "sucessfull"} # return sucessfull in the front
+'''
