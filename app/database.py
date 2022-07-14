@@ -12,7 +12,7 @@ SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 Base = declarative_base()
 
 
-# Resposavel por criar/fechar as sessões com o db, todo request da API ela será chamada.
+# Responsible por criar/fechar as sessões com o db, todo request da API ela será chamada.
 # add "db: Session = Depends(get_db) nas funções para que ela funcione.
 def get_db():
     db = SessionLocal()
