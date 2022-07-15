@@ -31,3 +31,7 @@ class UserOut(BaseModel): # return do client
     # faz com que o pydantic "converta" o sql para dict, ler a doc.
     class Config:
         orm_mode = True
+
+class UserLogin(BaseModel):
+    email: EmailStr
+    password: str

@@ -17,3 +17,7 @@ pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 # func to makes easy to use
 def hash(password: str):
     return pwd_context.hash(password)
+
+# takes plain pw, hash and compare with hashed in db
+def verify(plain_password, hashed_password):
+    return pwd_context.verify(plain_password, hashed_password)
