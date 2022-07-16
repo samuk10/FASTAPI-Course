@@ -1,5 +1,6 @@
 from pydantic import BaseModel, EmailStr
 from datetime import datetime
+from typing import Optional
 
 # o cara que define o DataType e validador de campos
 # schema/pydantic, define the structure of a request & response
@@ -35,3 +36,10 @@ class UserOut(BaseModel): # return do client
 class UserLogin(BaseModel):
     email: EmailStr
     password: str
+
+class Token(BaseModel):
+    access_token: str
+    token_type: str
+
+class TokenData(BaseModel):
+    id: Optional[str] = None

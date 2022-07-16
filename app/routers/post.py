@@ -1,7 +1,7 @@
 from fastapi import FastAPI, status, HTTPException, Response, Depends, APIRouter
 from sqlalchemy.orm import Session
 from typing import List
-from .. import models, schemas
+from .. import models, schemas, oauth2
 from ..database import get_db
 
 # router object removendo /posts
@@ -13,7 +13,7 @@ router = APIRouter(
 
 '''#-- GET --#'''
 @router.get("/", response_model=List[schemas.Post]) # transform into list
-def get_posts(db: Session = Depends(get_db)):
+def get_posts(db: Session = Depends(get_db), current_user: int = Depends(oauth2.get_current_user)): # current_user forces user to be logged in to get post
     # cursor.execute("""SELECT * FROM posts""")
     # posts = cursor.fetchall()
     posts = db.query(models.Post).all()
@@ -21,7 +21,7 @@ def get_posts(db: Session = Depends(get_db)):
 
 #-- CREATE --#
 @router.post("/", status_code=status.HTTP_201_CREATED, response_model=schemas.Post) # alterado para 201 ao criar
-def create_posts(post: schemas.PostCreate, db: Session = Depends(get_db)):
+def create_posts(post: schemas.PostCreate, db: Session = Depends(get_db), current_user: int = Depends(oauth2.get_current_user)): # current_user forces user to be logged in to create post
     # cursor.execute("""INSERT INTO posts (title, content, published) VALUES (%s, %s, %s) RETURNING * """, 
     # (post.title, post.content, post.published)) # não da pra passar o valor direto no insert
     #                 # NÃO USAR (f"INSERT etc...) perigo de sql injection
@@ -32,6 +32,7 @@ def create_posts(post: schemas.PostCreate, db: Session = Depends(get_db)):
     # enves de ter que digitar toda vez:
     #new_post = models.Post(title=post.title, content=post.content, published=post.published)
 
+    print(current_user.email)
     #usar para criar dict e retornar todos fields model
     new_post = models.Post(**post.dict())
     # não esquecer de add e comitar
@@ -43,7 +44,7 @@ def create_posts(post: schemas.PostCreate, db: Session = Depends(get_db)):
 
 #-- GET{ID} --#
 @router.get("/{id}", response_model=schemas.Post)
-def get_post(id: int, db: Session = Depends(get_db)): # converter para int (para evitar inject)
+def get_post(id: int, db: Session = Depends(get_db), current_user: int = Depends(oauth2.get_current_user)): # current_user forces user to be logged in to get post # converter para int (para evitar inject)
     #cursor.execute("""SELECT * FROM posts WHERE id = %s """, (str(id),)) # convert str pois dá erro no SELECT
     #post = cursor.fetchone()
     post = db.query(models.Post).filter(models.Post.id == id).first()
@@ -59,7 +60,7 @@ def get_post(id: int, db: Session = Depends(get_db)): # converter para int (para
 
 #-- DELETE{ID} --# 
 @router.delete("/{id}", status_code=status.HTTP_204_NO_CONTENT)
-def delete_post(id: int, db: Session = Depends(get_db)):
+def delete_post(id: int, db: Session = Depends(get_db), current_user: int = Depends(oauth2.get_current_user)): # current_user forces user to be logged in to delete post
     # deleting post
     # find the index in the array that has required ID
     # my_posts.pop(index)
@@ -82,7 +83,7 @@ def delete_post(id: int, db: Session = Depends(get_db)):
 
 #-- UPDATE{ID} --# 
 @router.put("/{id}", response_model=schemas.Post)
-def update_post(id: int, updated_post: schemas.PostCreate, db: Session = Depends(get_db)):
+def update_post(id: int, updated_post: schemas.PostCreate, db: Session = Depends(get_db), current_user: int = Depends(oauth2.get_current_user)): # current_user forces user to be logged in to update post
 
     #cursor.execute("""UPDATE posts SET title = %s, content = %s, published = %s WHERE id = %s RETURNING * """,
     #(post.title, post.content, post.published, str(id)))
