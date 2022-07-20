@@ -1,9 +1,10 @@
 from fastapi import FastAPI
-
 from . import models
 from .database import engine
 from .routers import post, user, auth
+from .config import settings
 
+print(settings.database_username)
 
 # o cara que identifica e cria as tabelas no db, 
 # mas, não modifica se houver uma tabela com o mesmo nome.
