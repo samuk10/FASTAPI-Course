@@ -16,7 +16,12 @@ router = APIRouter(
 def get_posts(db: Session = Depends(get_db), current_user: int = Depends(oauth2.get_current_user)): # current_user forces user to be logged in to get post
     # cursor.execute("""SELECT * FROM posts""")
     # posts = cursor.fetchall()
+
     posts = db.query(models.Post).all()
+
+# only sees own posts >  
+#   posts = db.query(models.Post).filter(
+#       models.Post.owner_id == current_user.id).all() # query posts from current logged user
     return posts # return json in the front
 
 #-- CREATE --#
@@ -31,16 +36,16 @@ def create_posts(post: schemas.PostCreate, db: Session = Depends(get_db), curren
 
     # enves de ter que digitar toda vez:
     #new_post = models.Post(title=post.title, content=post.content, published=post.published)
-
-    print(current_user.email)
+    #print(current_user.id)
+    #print(current_user.email)
     #usar para criar dict e retornar todos fields model
-    new_post = models.Post(**post.dict())
-    # não esquecer de add e comitar
+    new_post = models.Post(owner_id=current_user.id, **post.dict()) # owner_id is the user creating the post
+    # dont forgot to add and commit
     db.add(new_post)
     db.commit()
-    db.refresh(new_post) # pega o que foi adicionado, coloca na variável e retorna
+    db.refresh(new_post) # take what was add, put in a variable and return it
 
-    return new_post # send o dictionary em json
+    return new_post # send the dictionary in json
 
 #-- GET{ID} --#
 @router.get("/{id}", response_model=schemas.Post)
@@ -52,6 +57,11 @@ def get_post(id: int, db: Session = Depends(get_db), current_user: int = Depends
     if not post:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
                             detail=f"Post with id: {id} was not found")
+
+# if i wanted to only current user sees hes posts                            
+#    if post.owner_id != current_user.id: # just post owner can delete post.
+#        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN,
+#                            detail="Not authorized to perform requested action")
         #response.status_code = status.HTTP_404_NOT_FOUND # forma feia
         #return {'message': f"Post with id: {id} was not found"}
     return post
@@ -68,14 +78,22 @@ def delete_post(id: int, db: Session = Depends(get_db), current_user: int = Depe
     ## deleted_post = cursor.fetchone()
     ## conn.commit()
 
-    post = db.query(models.Post).filter(models.Post.id == id)
+    post_query = db.query(models.Post).filter(models.Post.id == id)
+
+    post = post_query.first()
+
     
     # se não existir o id =
-    if post.first() == None:
+    if post == None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, 
-        detail=f"post with id: {id} does not exist")
+                            detail=f"post with id: {id} does not exist")
+
+    if post.owner_id != current_user.id: # just post owner can delete post.
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN,
+                            detail="Not authorized to perform requested action")
+
     # se existir o id = deletar ele.
-    post.delete(synchronize_session=False)    
+    post_query.delete(synchronize_session=False)    
     db.commit()
 
     return Response(status_code=status.HTTP_204_NO_CONTENT)
@@ -99,6 +117,10 @@ def update_post(id: int, updated_post: schemas.PostCreate, db: Session = Depends
     if post == None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, 
         detail=f"post with id: {id} does not exist")
+
+    if post.owner_id != current_user.id: # just post owner can delete post.
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN,
+                            detail="Not authorized to perform requested action")
 
     # passar o dict com os valores a serem atualizados
     post_query.update(updated_post.dict(), synchronize_session=False)

@@ -12,18 +12,6 @@ class PostBase(BaseModel):
 class PostCreate(PostBase):
     pass
 
-class Post(PostBase): # decide witch value returns
-    id: int
-    created_at: datetime
-
-    # faz com que o pydantic "converta" o sql para dict, ler a doc.
-    class Config:
-        orm_mode = True
-
-class UserCreate(BaseModel):
-    email: EmailStr
-    password: str
-
 class UserOut(BaseModel): # return do client
     id: int
     email: EmailStr
@@ -32,6 +20,20 @@ class UserOut(BaseModel): # return do client
     # faz com que o pydantic "converta" o sql para dict, ler a doc.
     class Config:
         orm_mode = True
+
+class Post(PostBase): # decide witch value returns
+    id: int
+    created_at: datetime
+    owner_id: int
+    owner: UserOut # return UserOut(the info of the user)
+
+    # faz com que o pydantic "converta" o sql para dict, ler a doc.
+    class Config:
+        orm_mode = True
+
+class UserCreate(BaseModel):
+    email: EmailStr
+    password: str
 
 class UserLogin(BaseModel):
     email: EmailStr
