@@ -1,14 +1,7 @@
-from fastapi import FastAPI, status, HTTPException, Response, Depends
-from fastapi.params import Body
-from pydantic import BaseModel
-from typing import Optional, List # é optional, se não tiver = none
-from random import randrange
-import psycopg2 # driver do psql
-from psycopg2.extras import RealDictCursor # tras um dict com nome da coluna(psycopg2 tras errado)
-import time
-from sqlalchemy.orm import Session
-from . import models, schemas, utils
-from .database import engine, get_db
+from fastapi import FastAPI
+
+from . import models
+from .database import engine
 from .routers import post, user, auth
 
 
@@ -19,49 +12,10 @@ models.Base.metadata.create_all(bind=engine)
 
 app = FastAPI()
 
-
-
-# loop para tentar conectar ao banco, para em caso de erro o app não funfar sem
-while True:
-    try:
-        conn = psycopg2.connect(host='localhost', dbname='fastapi', user='postgres', 
-                                password='postgres', cursor_factory=RealDictCursor)
-        cursor = conn.cursor()
-        print("\nDatabase connection was successful!\n")
-        break
-    except Exception as error: # em caso de erro printar o error
-        print("\nConnecting to database failed\n")
-        print("Error: ", error)
-        time.sleep(3) # em caso de erro, esperar 3 sec para tentar novamente
-
-# variavel para salvar os posts em memoria
-my_posts = [{
-    "title": "title of post1", 
-    "content": "content of post1", 
-    "id": 1
-    },
-    {
-    "title": "favorite foods", 
-    "content": "I like pizza", 
-    "id": 2
-    }
-]
-
-def find_post(id):
-    for p in my_posts:
-        if p["id"] == id:
-            return p
-
-def find_index_post(id):
-    for i, p in enumerate(my_posts): # interate in the array and get index
-        if p['id'] == id: # 
-            return i # retorna o index no dictionary com o id specific
-
 # importing the routes from post.router
 app.include_router(post.router)
 app.include_router(user.router)
 app.include_router(auth.router)
-
 
 @app.get("/") #decorator > method: get, root path domain. ou seja é o caminho da url
 def root(): # nome de cada função

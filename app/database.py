@@ -20,3 +20,21 @@ def get_db():
         yield db
     finally:
         db.close()
+
+## connect to db without sqlalchemy
+#import psycopg2 # driver do psql
+#from psycopg2.extras import RealDictCursor # tras um dict com nome da coluna(psycopg2 tras errado)
+#import time
+#
+## loop para tentar conectar ao banco, para em caso de erro o app não funfar sem
+#while True:
+#    try:
+#        conn = psycopg2.connect(host='localhost', dbname='fastapi', user='postgres', 
+#                                password='postgres', cursor_factory=RealDictCursor)
+#        cursor = conn.cursor()
+#        print("\nDatabase connection was successful!\n")
+#        break
+#    except Exception as error: # em caso de erro printar o error
+#        print("\nConnecting to database failed\n")
+#        print("Error: ", error)
+#        time.sleep(3) # em caso de erro, esperar 3 sec para tentar novamente
