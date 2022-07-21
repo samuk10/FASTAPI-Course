@@ -2,6 +2,8 @@ from pydantic import BaseModel, EmailStr
 from datetime import datetime
 from typing import Optional
 
+from pydantic.types import conint
+
 # o cara que define o DataType e validador de campos
 # schema/pydantic, define the structure of a request & response
 class PostBase(BaseModel): 
@@ -45,3 +47,7 @@ class Token(BaseModel):
 
 class TokenData(BaseModel):
     id: Optional[str] = None
+
+class Vote(BaseModel):
+    post_id: int
+    dir: conint(le=1) # less or = 1

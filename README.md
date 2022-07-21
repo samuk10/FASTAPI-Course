@@ -12,7 +12,7 @@ https://www.youtube.com/watch?v=0sOvCWFmrtA
 # Features
 
 - users should be able to like a post
-- should only be able to like a post at once
+- should only be able to like a post at once (composite primary_key will take care of it!)
 - retrieving posts should also fetch the total number of likes
 
 # stuffs
