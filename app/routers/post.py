@@ -1,6 +1,8 @@
 from fastapi import FastAPI, status, HTTPException, Response, Depends, APIRouter
 from sqlalchemy.orm import Session
 from typing import List, Optional
+
+from sqlalchemy import func
 from .. import models, schemas, oauth2
 from ..database import get_db
 
@@ -12,14 +14,21 @@ router = APIRouter(
 
 
 '''#-- GET --#'''
-@router.get("/", response_model=List[schemas.Post]) # transform into list
+@router.get("/", response_model=List[schemas.PostOut]) # transform into list
 def get_posts(db: Session = Depends(get_db), current_user: int = Depends(oauth2.get_current_user),
  limit: int = 10, skip: int = 0, search: Optional[str] = ""): # current_user forces user to be logged in to get post | "limit" query size
     # cursor.execute("""SELECT * FROM posts""")
     # posts = cursor.fetchall()
 
-    # filter_by search, limit of limit, skip 0 default
-    posts = db.query(models.Post).filter(models.Post.title.contains(search)).limit(limit).offset(skip).all()
+    # OLDER filter_by search, limit of limit, skip 0 default
+    # posts = db.query(models.Post).filter(models.Post.title.contains(search)).limit(limit).offset(skip).all()
+    
+    #results = db.query(models.Post, func.count(models.Vote.post_id).label("votes")).join(
+        #models.Vote, models.Vote.post_id == models.Post.id, isouter=True).group_by(models.Post.id).all()
+    posts = db.query(models.Post, func.count(models.Vote.post_id).label("votes")).join(
+       models.Vote, models.Vote.post_id == models.Post.id, isouter=True).group_by(
+        models.Post.id).filter(models.Post.title.contains(search)).limit(limit).offset(skip).all()
+    
 
 # only sees own posts >  
 #   posts = db.query(models.Post).filter(
@@ -50,11 +59,15 @@ def create_posts(post: schemas.PostCreate, db: Session = Depends(get_db), curren
     return new_post # send the dictionary in json
 
 #-- GET{ID} --#
-@router.get("/{id}", response_model=schemas.Post)
+@router.get("/{id}", response_model=schemas.PostOut)
 def get_post(id: int, db: Session = Depends(get_db), current_user: int = Depends(oauth2.get_current_user)): # current_user forces user to be logged in to get post # converter para int (para evitar inject)
     #cursor.execute("""SELECT * FROM posts WHERE id = %s """, (str(id),)) # convert str pois dá erro no SELECT
     #post = cursor.fetchone()
-    post = db.query(models.Post).filter(models.Post.id == id).first()
+    # post = db.query(models.Post).filter(models.Post.id == id).first()
+
+    post = db.query(models.Post, func.count(models.Vote.post_id).label("votes")).join(
+       models.Vote, models.Vote.post_id == models.Post.id, isouter=True).group_by(
+        models.Post.id).filter(models.Post.id == id).first()
 
     if not post:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
