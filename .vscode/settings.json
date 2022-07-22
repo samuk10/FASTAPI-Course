@@ -3,6 +3,8 @@
         "sqlalchemy"
     ],
     "cSpell.words": [
+        "DBAPI",
+        "poolclass",
         "tabelas"
     ],
     "FSharp.suggestGitignore": false
