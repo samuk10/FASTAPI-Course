@@ -8,8 +8,8 @@ print(settings.database_username)
 
 # o cara que identifica e cria as tabelas no db, 
 # mas, não modifica se houver uma tabela com o mesmo nome.
-# usar "Alembic" caso for necessário alterar a estrutura das tabelas
-models.Base.metadata.create_all(bind=engine)
+#  not needed anymore, alembic is taking care of it
+#### models.Base.metadata.create_all(bind=engine)
 
 app = FastAPI()
 
