@@ -38,3 +38,5 @@ web: uvicorn app.main:app --host=0.0.0.0 --port=${PORT:-5000}
 receive port from heroku, but provide a default if not given
 
 https://fastapi-samuk10.herokuapp.com/ deployed to Heroku
+
+heroku logs --tail
