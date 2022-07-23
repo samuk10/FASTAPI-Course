@@ -21,3 +21,20 @@ running the app: uvicorn app.main:app --reload
 
 at: 9h:21m
 last commit:
+
+heroku --version
+heroku login
+heroku create fastapi-samuk10
+
+git remote
+git push heroku main # deploy para a plataforma
+
+open the url
+
+create file for heroku on root:
+Profile
+put the command to start app
+web: uvicorn app.main:app --host=0.0.0.0 --port=${PORT:-5000}
+receive port from heroku, but provide a default if not given
+
+https://fastapi-samuk10.herokuapp.com/ deployed to Heroku
