@@ -11,13 +11,20 @@ https://www.youtube.com/watch?v=0sOvCWFmrtA
 
 # Features
 
-- users should be able to like a post
-- should only be able to like a post at once (composite primary_key will take care of it!)
+running on Heroku: https://fastapi-samuk10.herokuapp.com/docs#/
+
+- login to get, create, update
+- can delete/update only own post
+- search by post
+- should be only be able to like a post at once
 - retrieving posts should also fetch the total number of likes
 
 # stuffs
 
 running the app: uvicorn app.main:app --reload
 
-at: 9h:21m
-last commit:
+at: 12h:08m
+last commit added:
+
+- added to Heroku
+- running with no troubles
