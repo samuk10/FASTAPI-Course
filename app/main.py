@@ -1,17 +1,24 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, Request, Header
 from . import models
 from .database import engine
 from .routers import post, user, auth, vote
 from .config import settings
 
+from typing import Optional
+
+from fastapi.responses import HTMLResponse
+from fastapi.templating import Jinja2Templates
+
 print(settings.database_username)
 
-# o cara que identifica e cria as tabelas no db, 
+# o cara que identifica e cria as tabelas no db,
 # mas, não modifica se houver uma tabela com o mesmo nome.
 #  not needed anymore, alembic is taking care of it
-#### models.Base.metadata.create_all(bind=engine)
+# models.Base.metadata.create_all(bind=engine)
 
 app = FastAPI()
+
+templates = Jinja2Templates(directory="templates")
 
 # importing the routes from post.router
 app.include_router(post.router)
@@ -19,13 +26,25 @@ app.include_router(user.router)
 app.include_router(auth.router)
 app.include_router(vote.router)
 
-@app.get("/") #decorator > method: get, root path domain. ou seja é o caminho da url
-def root(): # nome de cada função
-    return {"message": "Hello World!!!!"} # o que acontece
+
+# decorator > method: get, root path domain. ou seja é o caminho da url
+@app.get("/")
+def root():  # nome de cada função
+    return {"message": "Hello World!!!!"}  # o que acontece
 
 
-
-
+@app.get('/index/', response_class=HTMLResponse)
+# Header will convert to hx-request
+def index(request: Request, hx_request: Optional[str] = Header(None)):
+    films = [
+        {'name': 'Blade Runner', 'director': 'Ridley Scott'},
+        {'name': 'Pulp Fiction', 'director': 'Quentin Tarantino'},
+        {'name': 'Mulholland Drive', 'director': 'David Lynch'},
+    ]
+    context = {"request": request, 'films': films}
+    if hx_request:
+        return templates.TemplateResponse("partials/table.html", context)
+    return templates.TemplateResponse("index.html", context)
 
 
 '''
@@ -34,7 +53,7 @@ def root(): # nome de cada função
 def create_posts(payLoad: dict = Body(...)): # extract all fields from body, convert to dict, store na variable payLoad
     print(payLoad)
     return {"new_post": f"title {payLoad['title']} content: {payLoad['content']}"}
-# tittle str, content str  '''   
+# tittle str, content str  '''
 
 '''TEST
 @app.get("/sqlalchemy")
