@@ -4,8 +4,12 @@
     ],
     "cSpell.words": [
         "DBAPI",
+        "gunicorn",
         "poolclass",
-        "tabelas"
+        "samuel",
+        "tabelas",
+        "venv"
     ],
-    "FSharp.suggestGitignore": false
+    "FSharp.suggestGitignore": false,
+    "cSpell.language": "en,pt-BR"
 }

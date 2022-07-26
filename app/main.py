@@ -35,7 +35,7 @@ app.include_router(vote.router)
 
 @app.get("/") #decorator > method: get, root path domain. ou seja é o caminho da url
 def root(): # nome de cada função
-    return {"message": "Hello World!!!!"} # o que acontece
+    return {"message": "Hello World!!"} # o que acontece
 
 
 
