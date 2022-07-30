@@ -3,11 +3,13 @@
         "sqlalchemy"
     ],
     "cSpell.words": [
+        "aasdfjasdf",
         "DBAPI",
         "gunicorn",
         "poolclass",
         "samuel",
         "tabelas",
+        "updatd",
         "venv"
     ],
     "FSharp.suggestGitignore": false,
