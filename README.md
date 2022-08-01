@@ -28,8 +28,13 @@ running on Heroku: https://fastapi-samuk10.herokuapp.com/docs#/
 
 running the app: uvicorn app.main:app --reload
 
-at: 12h:08m
-last commit added:
+- create your .env with:
 
-- added to Heroku
-- running with no troubles
+DATABASE_HOSTNAME=
+DATABASE_PORT=
+DATABASE_PASSWORD=
+DATABASE_NAME=
+DATABASE_USERNAME=
+SECRET_KEY=
+ALGORITHM=
+ACCESS_TOKEN_EXPIRE_MINUTES=
